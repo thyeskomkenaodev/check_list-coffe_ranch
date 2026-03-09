@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffe Rach · Checklist Diário</title>
+    <!-- Fonte Inter e ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Biblioteca html2canvas e jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f7e8 0%, #faf9f5 100%);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+            color: #3e2e23;
+        }
+
+        .relatorio-card {
+            max-width: 1300px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 36px;
+            box-shadow: 0 20px 40px -12px rgba(101, 67, 33, 0.25), 0 2px 6px rgba(0,0,0,0.1);
+            padding: 2.2rem 2.5rem;
+            border: 1px solid #c4b5a0;
+        }
+
+        .logo-img {
+            height: 60px; /* Você pode ajustar a altura do seu logo aqui */
+            width: auto;
+        }
+
+        /* cabeçalho - verde e marrom */
+        .header-gelato {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 2px dashed #a7794b;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .header-gelato i {
+            font-size: 2.4rem;
+            color: #4a704a;
+            background: #eaf2e0;
+            padding: 12px;
+            border-radius: 60px;
+        }
+        .header-gelato h1 {
+            font-weight: 600;
+            font-size: 1.9rem;
+            letter-spacing: -0.02em;
+            color: #2d5a2d;
+        }
+        .header-gelato .badge-semana {
+            margin-left: auto;
+            background: #a7794b;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: inset 0 1px 3px #d4b08c;
+        }
+        .badge-semana i {
+            font-size: 1rem;
+            background: transparent;
+            padding: 0;
+            color: #ffffff;
+        }
+
+        /* data */
+        .sub-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2.2rem;
+            color: #4a704a;
+            font-weight: 500;
+            background: #f0f2e5;
+            padding: 0.9rem 1.5rem;
+            border-radius: 60px;
+            font-size: 0.98rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .sub-info i {
+            margin-right: 6px;
+            color: #a7794b;
+            width: 1.2rem;
+        }
+        .data-dinamica {
+            background: #a7794b;
+            padding: 0.2rem 1rem;
+            border-radius: 30px;
+            color: #ffffff;
+        }
+
+        /* GRADE DO CHECKLIST – 3 colunas */
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* cada categoria com título */
+        .categoria-titulo {
+            grid-column: span 3;
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #2d5a2d;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 3px solid #a7794b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .categoria-titulo i {
+            color: #a7794b;
+            font-size: 1.6rem;
+        }
+
+        /* cada item com status "Feito/Não feito" */
+        .item-checklist {
+            background: #fcfaf7;
+            border: 1px solid #d9cdc0;
+            border-radius: 28px;
+            padding: 1rem 1.2rem 1rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            transition: all 0.15s;
+            box-shadow: 0 4px 8px -6px rgba(101, 67, 33, 0.15);
+        }
+        .item-checklist:hover {
+            border-color: #a7794b;
+            background: #fffcf5;
+            box-shadow: 0 8px 14px -10px #7b5a3a;
+        }
+
+        .item-linha-principal {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+        .item-linha-principal i {
+            color: #4a704a;
+            font-size: 1.2rem;
+            width: 1.8rem;
+            text-align: center;
+        }
+        .item-linha-principal span {
+            font-weight: 500;
+            font-size: 0.98rem;
+            color: #3e2e23;
+            flex: 1;
+        }
+
+        .pontuacao-item {
+            font-size: 0.85rem;
+            background: #a7794b;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            color: #ffffff;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .pontuacao-item i {
+            margin-right: 3px;
+            color: #ffffff;
+            width: auto;
+        }
+
+        /* seletor de status (Feito / Não feito) */
+        .status-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-left: calc(1.8rem + 12px);
+        }
+        .status-opcao {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            background: #f0f2e5;
+            border: 1px solid #d9cdc0;
+            transition: 0.1s;
+        }
+        .status-opcao.selected {
+            background: #4a704a;
+            border-color: #2d5a2d;
+            color: white;
+        }
+        .status-opcao.selected i {
+            color: white;
+        }
+        .status-opcao i {
+            font-size: 0.85rem;
+            color: #4a704a;
+        }
+        .status-opcao.selected i {
+            color: white;
+        }
+        .status-opcao:not(.selected):hover {
+            background: #a7794b;
+            color: white;
+            border-color: #7b5a3a;
+        }
+        .status-opcao:not(.selected):hover i {
+            color: white;
+        }
+
+        /* barra de pontuação e botões */
+        .resumo-semanal {
+            background: #a7794b;
+            border-radius: 30px;
+            padding: 1.5rem 2rem;
+            margin-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            border: 1px solid #7b5a3a;
+        }
+        .pontuacao-total {
+            background: #2d5a2d;
+            color: #ffffff;
+            border-radius: 50px;
+            padding: 0.6rem 1.8rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .pontuacao-total i {
+            color: #ffffff;
+            font-size: 1.8rem;
+        }
+        .contador-tarefas {
+            background: #4a704a;
+            color: #ffffff;
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .botoes-acao {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .botao-relatorio {
+            background: #4a704a;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.9rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #2d5a2d;
+            box-shadow: 0 5px 0 #1e3f1e;
+            transform: translateY(0);
+        }
+        .botao-relatorio:active {
+            box-shadow: 0 1px 0 #1e3f1e;
+            transform: translateY(4px);
+        }
+        .botao-pdf {
+            background: #a7794b;
+            border: 1px solid #7b5a3a;
+            box-shadow: 0 5px 0 #5a4028;
+        }
+        .botao-pdf:active {
+            box-shadow: 0 1px 0 #5a4028;
+        }
+        .botao-csv {
+            background: #ffffff;
+            border: 1px solid #4a704a;
+            color: #2d5a2d;
+            box-shadow: 0 5px 0 #c4b5a0;
+        }
+        .botao-csv:active {
+            box-shadow: 0 1px 0 #c4b5a0;
+        }
+
+        /* Área de relatório gerado */
+        .relatorio-output {
+            margin-top: 2rem;
+            background: #fcfaf7;
+            border-radius: 24px;
+            padding: 1.5rem 2rem;
+            border: 2px solid #d9cdc0;
+            font-size: 1rem;
+        }
+        .relatorio-output h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #2d5a2d;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            border-bottom: 1px dotted #a7794b;
+            padding-bottom: 0.5rem;
+        }
+        .relatorio-texto {
+            background: #ffffff;
+            padding: 1rem 1.5rem;
+            border-radius: 18px;
+            color: #3e2e23;
+            line-height: 1.7;
+            white-space: pre-line;
+            font-weight: 450;
+            border: 1px solid #d9cdc0;
+            font-size: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .footer-assinatura {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #a7794b;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 6px;
+        }
+
+        @media (max-width: 1000px) {
+            .checklist-grid { grid-template-columns: repeat(2, 1fr); }
+            .categoria-titulo { grid-column: span 2; }
+        }
+        @media (max-width: 700px) {
+            .checklist-grid { grid-template-columns: 1fr; }
+            .categoria-titulo { grid-column: span 1; }
+            .relatorio-card { padding: 1.5rem; }
+            .header-gelato h1 { font-size: 1.5rem; }
+            .badge-semana { margin-left: 0; width: 100%; justify-content: center; }
+            .botoes-acao { justify-content: center; width: 100%; }
+            .resumo-semanal { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="relatorio-card">
+    <!-- cabeçalho -->
+    <div class="header-gelato">
+        <img src="caffe.jpeg" alt="Logo Coffe Rach" class="logo-img">
+        <h1>Coffe Rach · Checklist Diário</h1>
+        <div class="badge-semana">
+            <i class="far fa-calendar-alt"></i> <span id="semanaAtual"></span>
+        </div>
+    </div>
+
+    <!-- data dinâmica -->
+    <div class="sub-info">
+        <span><i class="far fa-clock"></i> <strong id="dataCompleta"></strong></span>
+        <span class="data-dinamica"><i class="fas fa-clipboard-list"></i> Relatório — <span id="responsavelNome">Colaborador</span></span>
+    </div>
+
+    <!-- CHECKLIST com todas as categorias -->
+    <div class="checklist-grid" id="checklistContainer">
+        
+        <!-- CATEGORIA: ATENDIMENTO / CAIXA -->
+        <div class="categoria-titulo"><i class="fas fa-cash-register"></i> Atendimento / Caixa</div>
+        
+        <!-- 1. Limpeza do balcão e caixa -->
+        <div class="item-checklist" data-task="caixa_limpeza" data-categoria="Atendimento" data-descricao="Limpeza do balcão e caixa" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-cash-register"></i><span>Limpeza do balcão e caixa</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="caixa_limpeza"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 2. Organização de geladeira frente -->
+        <div class="item-checklist" data-task="caixa_copos" data-categoria="Atendimento" data-descricao="Organização de geladeira frente" data-pontos="4">
+            <div class="item-linha-principal"><i class="fas fa-door-open"></i><span>Organização de geladeira frente</span><span class="pontuacao-item"><i class="fas fa-star"></i> 4</span></div>
+            <div class="status-selector" data-task-id="caixa_copos"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 3. Organização de molhos, palitos e guardanapos -->
+        <div class="item-checklist" data-task="caixa_organizar" data-categoria="Atendimento" data-descricao="Organização de molhos, palitos e guardanapos" data-pontos="3">
+            <div class="item-linha-principal"><i class="fas fa-clipboard-list"></i><span>Organização de molhos, palitos e guardanapos</span><span class="pontuacao-item"><i class="fas fa-star"></i> 3</span></div>
+            <div class="status-selector" data-task-id="caixa_organizar"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 4. Organização de notinhas de vendas e papeladas -->
+        <div class="item-checklist" data-task="caixa_troco" data-categoria="Atendimento" data-descricao="Organização de notinhas de vendas e papeladas" data-pontos="3">
+            <div class="item-linha-principal"><i class="fas fa-coins"></i><span>Organização de notinhas de vendas e papeladas</span><span class="pontuacao-item"><i class="fas fa-star"></i> 3</span></div>
+            <div class="status-selector" data-task-id="caixa_troco"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 5. Organização de expositoras de produtos -->
+        <div class="item-checklist" data-task="caixa_expositor" data-categoria="Atendimento" data-descricao="Organização de expositoras de produtos" data-pontos="3">
+            <div class="item-linha-principal"><i class="fas fa-tags"></i><span>Organização de expositoras de produtos</span><span class="pontuacao-item"><i class="fas fa-star"></i> 3</span></div>
+            <div class="status-selector" data-task-id="caixa_expositor"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+
+        <!-- CATEGORIA: COZINHA / PREPARO -->
+        <div class="categoria-titulo"><i class="fas fa-kitchen-set"></i> Cozinha / Preparo</div>
+        
+        <!-- 6. Limpeza do fogão de preparo -->
+        <div class="item-checklist" data-task="cozinha_fogao" data-categoria="Cozinha" data-descricao="Limpeza do fogão de preparo" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-fire"></i><span>Limpeza do fogão de preparo</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="cozinha_fogao"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 7. Limpeza e organização das geladeiras -->
+        <div class="item-checklist" data-task="cozinha_geladeira" data-categoria="Cozinha" data-descricao="Limpeza e organização das geladeiras" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-refrigerator"></i><span>Limpeza e organização das geladeiras</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="cozinha_geladeira"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 8. Higiene das mãos e uso de luvas/toucas -->
+        <div class="item-checklist" data-task="cozinha_higiene" data-categoria="Cozinha" data-descricao="Higiene das mãos e uso de luvas/toucas" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-hand-sparkles"></i><span>Higiene das mãos e uso de luvas/toucas</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="cozinha_higiene"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 9. Organização de ingredientes e produtos -->
+        <div class="item-checklist" data-task="cozinha_organizar" data-categoria="Cozinha" data-descricao="Organização de ingredientes e produtos" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-boxes"></i><span>Organização de ingredientes e produtos</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="cozinha_organizar"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 10. Organização de mercadoria em geral -->
+        <div class="item-checklist" data-task="cozinha_mercadoria" data-categoria="Cozinha" data-descricao="Organização de mercadoria em geral" data-pontos="3">
+            <div class="item-linha-principal"><i class="fas fa-dolly"></i><span>Organização de mercadoria em geral</span><span class="pontuacao-item"><i class="fas fa-star"></i> 3</span></div>
+            <div class="status-selector" data-task-id="cozinha_mercadoria"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 11. Limpeza de freezers e organização -->
+        <div class="item-checklist" data-task="cozinha_freezers" data-categoria="Cozinha" data-descricao="Limpeza de freezers e organização" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-snowflake"></i><span>Limpeza de freezers e organização</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="cozinha_freezers"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 12. Troca de saco de lixo da cozinha -->
+        <div class="item-checklist" data-task="cozinha_lixo" data-categoria="Cozinha" data-descricao="Troca de saco de lixo da cozinha" data-pontos="4">
+            <div class="item-linha-principal"><i class="fas fa-trash-can"></i><span>Troca de saco de lixo da cozinha</span><span class="pontuacao-item"><i class="fas fa-star"></i> 4</span></div>
+            <div class="status-selector" data-task-id="cozinha_lixo"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 13. Louça lavada e guardada -->
+        <div class="item-checklist" data-task="cozinha_louca" data-categoria="Cozinha" data-descricao="Louça lavada e guardada" data-pontos="3">
+            <div class="item-linha-principal"><i class="fas fa-plate-wheat"></i><span>Louça lavada e guardada</span><span class="pontuacao-item"><i class="fas fa-star"></i> 3</span></div>
+            <div class="status-selector" data-task-id="cozinha_louca"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 14. Limpeza da pia e torneiras -->
+        <div class="item-checklist" data-task="cozinha_pia" data-categoria="Cozinha" data-descricao="Limpeza da pia e torneiras" data-pontos="3">
+            <div class="item-linha-principal"><i class="fas fa-sink"></i><span>Limpeza da pia e torneiras</span><span class="pontuacao-item"><i class="fas fa-star"></i> 3</span></div>
+            <div class="status-selector" data-task-id="cozinha_pia"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+
+        <!-- CATEGORIA: SALÃO / LIMPEZA GERAL -->
+        <div class="categoria-titulo"><i class="fas fa-store"></i> Salão / Limpeza Geral</div>
+        
+        <!-- 15. Limpeza e organização das mesas -->
+        <div class="item-checklist" data-task="salao_mesas" data-categoria="Salão" data-descricao="Limpeza e organização das mesas" data-pontos="4">
+            <div class="item-linha-principal"><i class="fas fa-chair"></i><span>Limpeza e organização das mesas</span><span class="pontuacao-item"><i class="fas fa-star"></i> 4</span></div>
+            <div class="status-selector" data-task-id="salao_mesas"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 16. Limpeza do chão do salão -->
+        <div class="item-checklist" data-task="salao_chao" data-categoria="Salão" data-descricao="Limpeza do chão do salão" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-broom"></i><span>Limpeza do chão do salão</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="salao_chao"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 17. Lavagem da calçada (entrada) -->
+        <div class="item-checklist" data-task="salao_calcada" data-categoria="Salão" data-descricao="Lavagem da calçada (entrada)" data-pontos="4">
+            <div class="item-linha-principal"><i class="fas fa-water"></i><span>Lavagem da calçada (entrada)</span><span class="pontuacao-item"><i class="fas fa-star"></i> 4</span></div>
+            <div class="status-selector" data-task-id="salao_calcada"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 18. Coleta de lixo geral -->
+        <div class="item-checklist" data-task="salao_lixo" data-categoria="Salão" data-descricao="Coleta de lixo geral" data-pontos="4">
+            <div class="item-linha-principal"><i class="fas fa-trash-can"></i><span>Coleta de lixo geral</span><span class="pontuacao-item"><i class="fas fa-star"></i> 4</span></div>
+            <div class="status-selector" data-task-id="salao_lixo"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 19. Limpeza de vidros e portas -->
+        <div class="item-checklist" data-task="salao_vidros" data-categoria="Salão" data-descricao="Limpeza de vidros e portas" data-pontos="4">
+            <div class="item-linha-principal"><i class="fas fa-window"></i><span>Limpeza de vidros e portas</span><span class="pontuacao-item"><i class="fas fa-star"></i> 4</span></div>
+            <div class="status-selector" data-task-id="salao_vidros"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 20. Limpeza de ar condicionado/ventiladores -->
+        <div class="item-checklist" data-task="salao_ar" data-categoria="Salão" data-descricao="Limpeza de ar condicionado/ventiladores" data-pontos="3">
+            <div class="item-linha-principal"><i class="fas fa-wind"></i><span>Limpeza de ar condicionado/ventiladores</span><span class="pontuacao-item"><i class="fas fa-star"></i> 3</span></div>
+            <div class="status-selector" data-task-id="salao_ar"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+
+        <!-- CATEGORIA: BANHEIROS -->
+        <div class="categoria-titulo"><i class="fas fa-restroom"></i> Banheiros</div>
+        
+        <!-- 21. Limpeza do chão dos banheiros -->
+        <div class="item-checklist" data-task="banheiro_chao" data-categoria="Banheiros" data-descricao="Limpeza do chão dos banheiros" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-broom"></i><span>Limpeza do chão dos banheiros</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="banheiro_chao"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 22. Reposição de papel higiênico e toalhas -->
+        <div class="item-checklist" data-task="banheiro_papel" data-categoria="Banheiros" data-descricao="Reposição de papel higiênico e toalhas" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-toilet-paper"></i><span>Reposição de papel higiênico e toalhas</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="banheiro_papel"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 23. Limpeza de pias e espelhos -->
+        <div class="item-checklist" data-task="banheiro_pia" data-categoria="Banheiros" data-descricao="Limpeza de pias e espelhos" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-sink"></i><span>Limpeza de pias e espelhos</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="banheiro_pia"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        <!-- 24. Organização de produtos de limpeza -->
+        <div class="item-checklist" data-task="banheiro_produtos" data-categoria="Banheiros" data-descricao="Organização de produtos de limpeza" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-spray-can"></i><span>Organização de produtos de limpeza</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="banheiro_produtos"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
+        
+    </div> <!-- fim checklist-grid -->
+
+    <!-- barra de pontuação total e botões -->
+    <div class="resumo-semanal">
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <div class="pontuacao-total" id="pontuacaoTotalDisplay">
+                <i class="fas fa-trophy"></i> <span id="pontosObtidos">0</span>/100
+            </div>
+            <div class="contador-tarefas" id="contadorTarefas">
+                <i class="fa-solid fa-list-check"></i> <span id="tarefasFeitas">0</span>/<span id="tarefasTotal">25</span>
+            </div>
+        </div>
+        <div class="botoes-acao">
+            <button class="botao-relatorio" id="gerarRelatorioBtn">
+                <i class="fas fa-file-lines"></i> RELATÓRIO
+            </button>
+            <button class="botao-relatorio botao-pdf" id="salvarPdfBtn">
+                <i class="fas fa-file-pdf"></i> PDF
+            </button>
+            <button class="botao-relatorio botao-csv" id="exportarCsvBtn">
+                <i class="fas fa-file-csv"></i> EXPORTAR DADOS (CSV)
+            </button>
+        </div>
+    </div>
+
+    <!-- Área do relatório (incluída no PDF) -->
+    <div class="relatorio-output" id="relatorioOutput">
+        <h3><i class="fas fa-pen"></i> Resumo do Dia</h3>
+        <div class="relatorio-texto" id="relatorioTexto">
+            <i class="fas fa-chevron-circle-right"></i> Selecione "Feito" ou "Não feito" para cada tarefa.<br>
+            <i class="fas fa-chevron-circle-right"></i> Clique em EXPORTAR DADOS para gerar um arquivo CSV para o Power BI.
+        </div>
+        <div class="footer-assinatura">
+            <i class="fas fa-signature"></i> colaborador: <span id="assinaturaData"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Lista de tarefas (25 itens) com pontuação total 100
+        const tarefas = [
+            // Atendimento / Caixa (5 tarefas) - total 18
+            { id: 'caixa_limpeza', categoria: 'Atendimento', descricao: 'Limpeza do balcão e caixa', pontos: 5 },
+            { id: 'caixa_copos', categoria: 'Atendimento', descricao: 'Organização de geladeira frente', pontos: 4 },
+            { id: 'caixa_organizar', categoria: 'Atendimento', descricao: 'Organização de molhos, palitos e guardanapos', pontos: 3 },
+            { id: 'caixa_troco', categoria: 'Atendimento', descricao: 'Organização de notinhas de vendas e papeladas', pontos: 3 },
+            { id: 'caixa_expositor', categoria: 'Atendimento', descricao: 'Organização de expositoras de produtos', pontos: 3 },
+            
+            // Cozinha / Preparo (9 tarefas) - total 38
+            { id: 'cozinha_fogao', categoria: 'Cozinha', descricao: 'Limpeza do fogão de preparo', pontos: 5 },
+            { id: 'cozinha_geladeira', categoria: 'Cozinha', descricao: 'Limpeza e organização das geladeiras', pontos: 5 },
+            { id: 'cozinha_higiene', categoria: 'Cozinha', descricao: 'Higiene das mãos e uso de luvas/toucas', pontos: 5 },
+            { id: 'cozinha_organizar', categoria: 'Cozinha', descricao: 'Organização de ingredientes e produtos', pontos: 5 },
+            { id: 'cozinha_mercadoria', categoria: 'Cozinha', descricao: 'Organização de mercadoria em geral', pontos: 3 },
+            { id: 'cozinha_freezers', categoria: 'Cozinha', descricao: 'Limpeza de freezers e organização', pontos: 5 },
+            { id: 'cozinha_lixo', categoria: 'Cozinha', descricao: 'Troca de saco de lixo da cozinha', pontos: 4 },
+            { id: 'cozinha_louca', categoria: 'Cozinha', descricao: 'Louça lavada e guardada', pontos: 3 },
+            { id: 'cozinha_pia', categoria: 'Cozinha', descricao: 'Limpeza da pia e torneiras', pontos: 3 },
+            
+            // Salão / Limpeza Geral (6 tarefas) - total 24
+            { id: 'salao_mesas', categoria: 'Salão', descricao: 'Limpeza e organização das mesas', pontos: 4 },
+            { id: 'salao_chao', categoria: 'Salão', descricao: 'Limpeza do chão do salão', pontos: 5 },
+            { id: 'salao_calcada', categoria: 'Salão', descricao: 'Lavagem da calçada (entrada)', pontos: 4 },
+            { id: 'salao_lixo', categoria: 'Salão', descricao: 'Coleta de lixo geral', pontos: 4 },
+            { id: 'salao_vidros', categoria: 'Salão', descricao: 'Limpeza de vidros e portas', pontos: 4 },
+            { id: 'salao_ar', categoria: 'Salão', descricao: 'Limpeza de ar condicionado/ventiladores', pontos: 3 },
+            
+            // Banheiros (4 tarefas) - total 20
+            { id: 'banheiro_chao', categoria: 'Banheiros', descricao: 'Limpeza do chão dos banheiros', pontos: 5 },
+            { id: 'banheiro_papel', categoria: 'Banheiros', descricao: 'Reposição de papel higiênico e toalhas', pontos: 5 },
+            { id: 'banheiro_pia', categoria: 'Banheiros', descricao: 'Limpeza de pias e espelhos', pontos: 5 },
+            { id: 'banheiro_produtos', categoria: 'Banheiros', descricao: 'Organização de produtos de limpeza', pontos: 5 }
+        ];
+
+        // Elementos principais
+        const spanFeitas = document.getElementById('tarefasFeitas');
+        const spanTotal = document.getElementById('tarefasTotal');
+        const spanPontos = document.getElementById('pontosObtidos');
+        const btnGerar = document.getElementById('gerarRelatorioBtn');
+        const btnPdf = document.getElementById('salvarPdfBtn');
+        const btnCsv = document.getElementById('exportarCsvBtn');
+        const relatorioTexto = document.getElementById('relatorioTexto');
+        const assinaturaSpan = document.getElementById('assinaturaData');
+        const semanaSpan = document.getElementById('semanaAtual');
+        const dataCompletaSpan = document.getElementById('dataCompleta');
+        const relatorioOutput = document.getElementById('relatorioOutput');
+
+        // Inicializa datas
+        function obterSemanaAtual() {
+            const hoje = new Date();
+            const primeiroDiaAno = new Date(hoje.getFullYear(), 0, 1);
+            const dias = Math.floor((hoje - primeiroDiaAno) / (24 * 60 * 60 * 1000));
+            const semanaNum = Math.ceil((dias + primeiroDiaAno.getDay() + 1) / 7);
+            return `Semana ${semanaNum}`;
+        }
+
+        function formatarDataBrasil() {
+            const d = new Date();
+            const diasSemana = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+            const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+            const diaSem = diasSemana[d.getDay()];
+            const dia = d.getDate().toString().padStart(2,'0');
+            const mes = meses[d.getMonth()];
+            const ano = d.getFullYear();
+            return `${diaSem}, ${dia} de ${mes} ${ano}`;
+        }
+
+        function formatarDataISO() {
+            const d = new Date();
+            return d.toISOString().split('T')[0];
+        }
+
+        semanaSpan.textContent = obterSemanaAtual();
+        dataCompletaSpan.innerHTML = `<i class="far fa-calendar-check"></i> ${formatarDataBrasil()}`;
+        assinaturaSpan.textContent = `${formatarDataBrasil()}`;
+
+        // Configurar eventos para os seletores de status
+        document.querySelectorAll('.status-selector .status-opcao').forEach(opcao => {
+            opcao.addEventListener('click', function(e) {
+                const selector = this.closest('.status-selector');
+                selector.querySelectorAll('.status-opcao').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                atualizarPontuacaoContador();
+            });
+        });
+
+        // Função para obter status de uma tarefa
+        function getStatus(taskId) {
+            const selector = document.querySelector(`.status-selector[data-task-id="${taskId}"]`);
+            if (!selector) return 'nao-feito';
+            const selected = selector.querySelector('.status-opcao.selected');
+            return selected ? selected.dataset.status : 'nao-feito';
+        }
+
+        // Atualizar contador de tarefas e pontuação total
+        function atualizarPontuacaoContador() {
+            let feitas = 0;
+            let pontos = 0;
+            
+            tarefas.forEach(t => {
+                if (getStatus(t.id) === 'feito') {
+                    feitas++;
+                    pontos += t.pontos;
+                }
+            });
+            
+            spanFeitas.textContent = feitas;
+            spanTotal.textContent = tarefas.length;
+            spanPontos.textContent = pontos;
+        }
+
+        // Gerar relatório textual (para a caixa de texto)
+        function gerarRelatorio() {
+            const feitos = [];
+            const pendentes = [];
+            let pontosTotais = 0;
+
+            tarefas.forEach(tarefa => {
+                if (getStatus(tarefa.id) === 'feito') {
+                    feitos.push(`${tarefa.descricao} (${tarefa.pontos} pts)`);
+                    pontosTotais += tarefa.pontos;
+                } else {
+                    pendentes.push(tarefa.descricao);
+                }
+            });
+
+            const dataAtual = formatarDataBrasil();
+            const semana = obterSemanaAtual();
+
+            let relatorio = `☕ COFFE RACH · CHECKLIST DIÁRIO\n`;
+            relatorio += `📅 ${dataAtual}  |  ${semana}\n`;
+            relatorio += `🏆 PONTUAÇÃO: ${pontosTotais}/100 pontos\n`;
+            relatorio += `────────────────────────────\n`;
+            relatorio += `✅ Tarefas concluídas (${feitos.length}/${tarefas.length}):\n`;
+            if (feitos.length === 0) relatorio += `   (nenhuma)\n`;
+            else feitos.forEach(item => relatorio += `   • ${item}\n`);
+
+            if (pendentes.length > 0) {
+                relatorio += `\n⏳ Pendentes (${pendentes.length}):\n`;
+                pendentes.forEach(item => relatorio += `   ◦ ${item}\n`);
+            } else {
+                relatorio += `\n✨ Todas as tarefas foram concluídas! Parabéns!\n`;
+            }
+            return relatorio;
+        }
+
+        // Exibir relatório no output
+        function exibirRelatorioNoOutput() {
+            const texto = gerarRelatorio();
+            const textoHtml = texto.replace(/\n/g, '<br>')
+                .replace(/✅/g, '<i class="fa-regular fa-circle-check" style="color:#2d5a2d;"></i>')
+                .replace(/⏳/g, '<i class="fa-regular fa-clock" style="color:#a7794b;"></i>')
+                .replace(/📋/g, '<i class="fa-regular fa-clipboard"></i>')
+                .replace(/📅/g, '<i class="fa-regular fa-calendar"></i>')
+                .replace(/✨/g, '<i class="fa-regular fa-star" style="color:#a7794b;"></i>')
+                .replace(/🧼/g, '<i class="fa-solid fa-soap"></i>')
+                .replace(/🏆/g, '<i class="fas fa-trophy" style="color:#a7794b;"></i>')
+                .replace(/☕/g, '<i class="fas fa-mug-hot"></i>');
+            relatorioTexto.innerHTML = textoHtml;
+        }
+
+        function gerarHtmlParaPdf() {
+            const feitos = [];
+            const pendentes = [];
+
+            tarefas.forEach(tarefa => {
+                if (getStatus(tarefa.id) === 'feito') {
+                    feitos.push(tarefa.descricao);
+                } else {
+                    pendentes.push(tarefa.descricao);
+                }
+            });
+
+            const dataAtual = formatarDataBrasil();
+            const pontos = document.getElementById('pontosObtidos').textContent;
+
+            let html = `
+                <div id="pdf-content" style="position: absolute; left: -9999px; width: 700px; padding: 40px; background: white; font-family: sans-serif; color: #333;">
+                    <h1 style="font-size: 22px; color: #2d5a2d; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 20px;">Relatório de Checklist - Coffe Rach</h1>
+                    <p style="font-size: 14px; margin-bottom: 25px;"><strong>Data:</strong> ${dataAtual} | <strong>Pontuação Final:</strong> ${pontos} / 100</p>
+                    
+                    <h2 style="font-size: 18px; color: #2d5a2d; margin-top: 20px; margin-bottom: 10px;">✅ Tarefas Concluídas</h2>
+            `;
+
+            if (feitos.length > 0) {
+                html += '<ul style="list-style-type: none; padding-left: 0; font-size: 14px; line-height: 1.6;">';
+                feitos.forEach(item => { html += `<li style="padding: 4px 0; border-bottom: 1px solid #f0f0f0;">${item}</li>`; });
+                html += '</ul>';
+            } else {
+                html += '<p style="font-size: 14px; color: #777;">Nenhuma tarefa foi marcada como concluída.</p>';
+            }
+
+            html += `<h2 style="font-size: 18px; color: #a7794b; margin-top: 30px; margin-bottom: 10px;">❌ Tarefas Não Feitas</h2>`;
+
+            if (pendentes.length > 0) {
+                html += '<ul style="list-style-type: none; padding-left: 0; font-size: 14px; line-height: 1.6;">';
+                pendentes.forEach(item => { html += `<li style="padding: 4px 0; border-bottom: 1px solid #f0f0f0;">${item}</li>`; });
+                html += '</ul>';
+            } else {
+                html += '<p style="font-size: 14px; color: #777;">Todas as tarefas foram concluídas. Parabéns!</p>';
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        // Exportar CSV para Power BI
+        function exportarCSV() {
+            const dataISO = formatarDataISO();
+            const semana = obterSemanaAtual();
+            
+            let csvContent = "Data;Semana;Categoria;Tarefa;Status;Pontos\n";
+
+            tarefas.forEach(tarefa => {
+                const status = getStatus(tarefa.id) === 'feito' ? 'Feito' : 'Não feito';
+                csvContent += `${dataISO};${semana};${tarefa.categoria};${tarefa.descricao};${status};${tarefa.pontos}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `coffe_rach_${dataISO}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Evento do botão GERAR RELATÓRIO
+        btnGerar.addEventListener('click', () => {
+            atualizarPontuacaoContador();
+            exibirRelatorioNoOutput();
+        });
+
+        // Evento do botão SALVAR PDF
+        btnPdf.addEventListener('click', function() {
+            atualizarPontuacaoContador();
+
+            // Cria um container temporário para o conteúdo do PDF
+            const pdfContainer = document.createElement('div');
+            pdfContainer.innerHTML = gerarHtmlParaPdf(); // Usa a nova função para gerar o HTML
+            document.body.appendChild(pdfContainer);
+
+            const contentToPrint = document.getElementById('pdf-content');
+
+            html2canvas(contentToPrint, {
+                scale: 2, // Aumenta a resolução da imagem
+                logging: false,
+                useCORS: true
+            }).then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'pt', // Usa 'points' como unidade para A4
+                    format: 'a4'
+                });
+
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const canvasRatio = canvas.width / canvas.height;
+                
+                // Calcula as dimensões da imagem para caber na página A4 com margens
+                let imgWidth = pdfWidth - 80; // Margem de 40pt de cada lado
+                let imgHeight = imgWidth / canvasRatio;
+
+                if (imgHeight > pdfHeight - 80) { // Se a altura for maior que a página
+                    imgHeight = pdfHeight - 80;
+                    imgWidth = imgHeight * canvasRatio;
+                }
+
+                const xOffset = (pdfWidth - imgWidth) / 2;
+                const yOffset = 40; // Margem superior
+
+                pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
+                
+                const dataArquivo = formatarDataISO();
+                pdf.save(`Relatorio_Checklist_CoffeRach_${dataArquivo}.pdf`);
+            }).catch(error => {
+                console.error('Erro ao gerar PDF:', error);
+                alert('Não foi possível gerar o PDF. Tente novamente.');
+            }).finally(() => {
+                // Remove o container temporário do corpo do documento
+                document.body.removeChild(pdfContainer);
+            });
+        });
+
+        // Evento do botão EXPORTAR CSV
+        btnCsv.addEventListener('click', exportarCSV);
+
+        // Inicializa pontuação e relatório
+        atualizarPontuacaoContador();
+        exibirRelatorioNoOutput();
+    })();
+</script>
+<!-- fallback para ícones regular -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/regular.min.css">
+</body>
+</html>
