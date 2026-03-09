@@ -425,6 +425,11 @@
             <div class="item-linha-principal"><i class="fas fa-tags"></i><span>Organização de expositoras de produtos</span><span class="pontuacao-item"><i class="fas fa-star"></i> 3</span></div>
             <div class="status-selector" data-task-id="caixa_expositor"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
         </div>
+        <!-- 6. Produção de mercadorias -->
+        <div class="item-checklist" data-task="caixa_producao" data-categoria="Atendimento" data-descricao="Produção de mercadorias" data-pontos="5">
+            <div class="item-linha-principal"><i class="fas fa-cogs"></i><span>Produção de mercadorias</span><span class="pontuacao-item"><i class="fas fa-star"></i> 5</span></div>
+            <div class="status-selector" data-task-id="caixa_producao"><div class="status-opcao" data-status="feito"><i class="fas fa-check-circle"></i> Feito</div><div class="status-opcao selected" data-status="nao-feito"><i class="fas fa-times-circle"></i> Não feito</div></div>
+        </div>
 
         <!-- CATEGORIA: COZINHA / PREPARO -->
         <div class="categoria-titulo"><i class="fas fa-kitchen-set"></i> Cozinha / Preparo</div>
@@ -539,7 +544,7 @@
     <div class="resumo-semanal">
         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
             <div class="pontuacao-total" id="pontuacaoTotalDisplay">
-                <i class="fas fa-trophy"></i> <span id="pontosObtidos">0</span>/100
+                <i class="fas fa-trophy"></i> <span id="pontosObtidos">0</span>/105
             </div>
             <div class="contador-tarefas" id="contadorTarefas">
                 <i class="fa-solid fa-list-check"></i> <span id="tarefasFeitas">0</span>/<span id="tarefasTotal">25</span>
@@ -575,13 +580,14 @@
     (function() {
         // Lista de tarefas (25 itens) com pontuação total 100
         const tarefas = [
-            // Atendimento / Caixa (5 tarefas) - total 18
+            // Atendimento / Caixa (6 tarefas) - total 23
             { id: 'caixa_limpeza', categoria: 'Atendimento', descricao: 'Limpeza do balcão e caixa', pontos: 5 },
             { id: 'caixa_copos', categoria: 'Atendimento', descricao: 'Organização de geladeira frente', pontos: 4 },
             { id: 'caixa_organizar', categoria: 'Atendimento', descricao: 'Organização de molhos, palitos e guardanapos', pontos: 3 },
             { id: 'caixa_troco', categoria: 'Atendimento', descricao: 'Organização de notinhas de vendas e papeladas', pontos: 3 },
             { id: 'caixa_expositor', categoria: 'Atendimento', descricao: 'Organização de expositoras de produtos', pontos: 3 },
-            
+            { id: 'caixa_producao', categoria: 'Atendimento', descricao: 'Produção de mercadorias', pontos: 5 },
+
             // Cozinha / Preparo (9 tarefas) - total 38
             { id: 'cozinha_fogao', categoria: 'Cozinha', descricao: 'Limpeza do fogão de preparo', pontos: 5 },
             { id: 'cozinha_geladeira', categoria: 'Cozinha', descricao: 'Limpeza e organização das geladeiras', pontos: 5 },
